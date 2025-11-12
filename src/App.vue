@@ -1,43 +1,37 @@
 <script setup lang="ts">
-import { useAppStore } from "./stores/app";
-import ThemeToggle from "./components/ThemeToggle.vue";
 import { onMounted } from "vue";
+import { useAppStore } from "./stores/app";
+import { useDataStore } from "./stores/data";
+import ThemeToggle from "./components/ThemeToggle.vue";
+import SearchBar from "./components/SearchBar.vue";
+import PostsTable from "./components/PostsTable.vue";
 
 const app = useAppStore();
+const data = useDataStore();
 
 onMounted(() => {
   app.initTheme();
+  data.initLoad();
 });
 </script>
 
 <template>
   <main class="min-h-dvh grid place-items-center p-4">
     <section class="w-[600px] h-[600px] flex flex-col">
-      <header class="flex items-center justify-end">
+      <header class="flex items-center justify-between gap-3">
+        <SearchBar />
         <ThemeToggle />
       </header>
 
-      <!-- заглушка -->
-      <div
-        class="mt-4 flex-1 min-h-0 rounded border border-neutral-300 dark:border-neutral-700 p-4 text-sm opacity-80"
-      >
-        Заглушка интерфейса.
+      <div class="mt-4 flex-1 min-h-0">
+        <div
+          v-if="data.loading"
+          class="rounded border p-6 text-center text-sm opacity-80 border-neutral-300 dark:border-neutral-700"
+        >
+          Загрузка...
+        </div>
+        <PostsTable v-else class="h-full" />
       </div>
     </section>
   </main>
 </template>
-
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
