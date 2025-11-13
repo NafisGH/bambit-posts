@@ -1,22 +1,80 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted, ref, watch, nextTick } from "vue";
 import { useDataStore } from "../stores/data";
 import { useAppStore } from "../stores/app";
+import UserDialog from "./UserDialog.vue";
 
 const data = useDataStore();
 const app = useAppStore();
 
+const scroller = ref<HTMLElement | null>(null);
+
+const sentinel = ref<HTMLElement | null>(null);
+// наблюдатель
+let io: IntersectionObserver | null = null;
+
+// состояние модалки
+const dialogOpen = ref(false);
+const dialogUserId = ref<number | null>(null);
+
+// смена сортировки
 function sortBy(key: "id" | "title" | "author" | "body") {
   data.setSort(key);
 }
 
+// подсветка «просмотренных» e-mail
 function isViewedEmail(userId: number) {
   return app.viewedUserIds.includes(userId);
 }
+
+// открыть модалку по клику по email
+function openUser(userId: number) {
+  dialogUserId.value = userId;
+  dialogOpen.value = true;
+}
+
+function setupIO() {
+  if (!scroller.value || !sentinel.value) return;
+
+  io = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      if (!entry || !entry.isIntersecting) return;
+
+      const total = data.postsSorted.length;
+      const visible = data.postsVisible.length;
+      if (visible < total) data.visibleCount += 30;
+    },
+    {
+      root: scroller.value,
+      threshold: 1.0,
+    }
+  );
+
+  io.observe(sentinel.value);
+}
+
+onMounted(() => setupIO());
+onUnmounted(() => {
+  io?.disconnect();
+  io = null;
+});
+
+// при смене набора (поиск/сортировка) пересоздаём наблюдатель
+watch(
+  () => data.postsSorted.length,
+  async () => {
+    io?.disconnect();
+    io = null;
+    await nextTick();
+    setupIO();
+  }
+);
 </script>
 
 <template>
-  <!-- Родитель передает фиксированную высоту, единый внутренний скролл -->
   <div
+    ref="scroller"
     class="h-full overflow-y-auto rounded border border-neutral-300 dark:border-neutral-700"
   >
     <table class="w-full table-fixed border-collapse">
@@ -52,6 +110,7 @@ function isViewedEmail(userId: number) {
           </th>
         </tr>
       </thead>
+
       <tbody>
         <tr
           v-for="p in data.postsVisible"
@@ -60,8 +119,6 @@ function isViewedEmail(userId: number) {
         >
           <td class="px-3 py-2 truncate" :title="String(p.id)">{{ p.id }}</td>
           <td class="px-3 py-2 truncate" :title="p.title">{{ p.title }}</td>
-
-          <!-- На этом шаге это просто текст-кнопка пока без модалки  -->
           <td class="px-3 py-2">
             <button
               class="max-w-full truncate hover:underline"
@@ -71,14 +128,23 @@ function isViewedEmail(userId: number) {
                   : 'text-inherit'
               "
               :title="p.authorEmail || '—'"
+              @click="openUser(p.userId)"
             >
               {{ p.authorEmail || "—" }}
             </button>
           </td>
-
           <td class="px-3 py-2 truncate" :title="p.body">{{ p.body }}</td>
         </tr>
       </tbody>
     </table>
+
+    <div ref="sentinel" class="h-2"></div>
   </div>
+
+  <!-- модалка -->
+  <UserDialog
+    :open="dialogOpen"
+    :userId="dialogUserId"
+    @close="dialogOpen = false"
+  />
 </template>
