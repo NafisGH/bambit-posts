@@ -2,16 +2,17 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useAppStore } from "../stores/app";
 import { useDataStore } from "../stores/data";
+import { X } from "lucide-vue-next";
 
 // props: показываем диалог, и userId ID автора
 const props = defineProps<{ open: boolean; userId: number | null }>();
-// события: close — закрыть модалку
+// закрыть модалку
 const emit = defineEmits<{ (e: "close"): void }>();
 
 const data = useDataStore();
 const app = useAppStore();
 
-// клик «вне» карточки — закрывает диалог
+// клик «вне» карточки — закрывает
 const cardRef = ref<HTMLElement | null>(null);
 
 const user = computed(() =>
@@ -86,7 +87,7 @@ const addressLine = computed(() => {
             aria-label="Закрыть"
             @click="emit('close')"
           >
-            ✕
+            <X class="w-4 h-4" />
           </button>
         </header>
 
