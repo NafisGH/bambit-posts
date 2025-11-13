@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useAppStore } from "../stores/app";
 import { useDataStore } from "../stores/data";
+import { Search } from "lucide-vue-next";
 
 const app = useAppStore();
 const data = useDataStore();
@@ -28,11 +29,14 @@ function onKey(e: KeyboardEvent) {
       @keydown="onKey"
     />
     <button
-      class="rounded bg-neutral-900 px-4 py-2 text-white disabled:opacity-60 dark:bg-neutral-200 dark:text-neutral-900"
+      class="rounded bg-neutral-900 px-4 py-2 text-white transition hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 disabled:opacity-60 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-neutral-300 dark:focus-visible:ring-neutral-600"
       :disabled="data.loading"
       @click="doSearch"
     >
-      {{ data.loading ? "Поиск..." : "Поиск" }}
+      <span class="inline-flex items-center gap-2">
+        <Search class="w-4 h-4" />
+        {{ data.loading ? "Поиск..." : "Поиск" }}
+      </span>
     </button>
   </div>
 </template>

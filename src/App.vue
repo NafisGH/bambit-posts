@@ -5,6 +5,8 @@ import { useDataStore } from "./stores/data";
 import ThemeToggle from "./components/ThemeToggle.vue";
 import SearchBar from "./components/SearchBar.vue";
 import PostsTable from "./components/PostsTable.vue";
+import Toast from "./components/Toast.vue";
+import SkeletonTable from "./components/SkeletonTable.vue";
 
 const app = useAppStore();
 const data = useDataStore();
@@ -22,16 +24,14 @@ onMounted(() => {
         <SearchBar />
         <ThemeToggle />
       </header>
-
+      <div class="mt-2 text-xs opacity-70">
+        Показано {{ data.postsVisible.length }} из {{ data.postsSorted.length }}
+      </div>
       <div class="mt-4 flex-1 min-h-0">
-        <div
-          v-if="data.loading"
-          class="rounded border p-6 text-center text-sm opacity-80 border-neutral-300 dark:border-neutral-700"
-        >
-          Загрузка...
-        </div>
+        <SkeletonTable v-if="data.loading" class="h-full" />
         <PostsTable v-else class="h-full" />
       </div>
+      <Toast />
     </section>
   </main>
 </template>
