@@ -1,10 +1,10 @@
-Bambit Posts (Vue 3 + Vite + TS)
+# Bambit Posts (Vue 3 + Vite + TS)
 
 Список постов с JSONPlaceholder в таблице 600×600: поиск по title, сортировка, ленивая подгрузка, карточка пользователя.
 
 Демо: https://bambit-posts.netlify.app/
 
-Стек
+# Стек
 
 Vue 3 + <script setup> + TypeScript
 
@@ -16,15 +16,15 @@ Vite
 
 Node 22.x
 
-Быстрый старт
+# Быстрый старт
 npm i
 npm run dev      # http://localhost:5173
 
-Сборка
+# Сборка
 npm run build
 npm run preview
 
-Функциональность
+# Функциональность
 
 Автозагрузка users и posts при старте.
 
@@ -45,18 +45,6 @@ npm run preview
 Тема light/dark, просмотренные email и строка поиска — в localStorage.
 
 Ошибки API → toast: «Сервис временно недоступен…».
-
-Структура (кратко)
-src/
-  components/ PostsTable.vue, SearchBar.vue, ThemeToggle.vue,
-              UserDialog.vue, Toast.vue, SkeletonTable.vue
-  stores/     app.ts, data.ts
-  utils/      api.ts, types.ts
-  App.vue, main.ts, style.css
-
-Проверка ошибки API (быстро)
-
-DevTools → Network → Offline → перезагрузить страницу → появится toast. Верните Online.
 
 Деплой (Netlify)
 
