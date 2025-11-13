@@ -6,7 +6,6 @@ type SortKey = "id" | "title" | "author" | "body";
 type SortDir = "asc" | "desc" | null;
 
 function humanCompare(a: string, b: string) {
-  // Человеческая» сортировка: без учёта регистра, с учётом чисел
   return a.localeCompare(b, undefined, {
     sensitivity: "accent",
     numeric: true,
@@ -19,7 +18,7 @@ export const useDataStore = defineStore("data", {
     postsAll: [] as Post[], // посты текущего поиска
     sortKey: null as SortKey | null,
     sortDir: null as SortDir, // два состояния: asc/desc
-    visibleCount: 30, // показываем первые 30
+    visibleCount: 30,
     loading: false,
     error: "",
   }),
@@ -69,7 +68,7 @@ export const useDataStore = defineStore("data", {
       try {
         const [users, posts] = await Promise.all([
           fetchUsers(),
-          fetchPostsByTitle(""), // пустая строка -> все посты
+          fetchPostsByTitle(""),
         ]);
         this.users = new Map(users.map((u) => [u.id, u]));
         this.postsAll = posts;
@@ -87,7 +86,6 @@ export const useDataStore = defineStore("data", {
       try {
         const posts = await fetchPostsByTitle(title);
         this.postsAll = posts;
-        // После нового поиска — сброс сортировки
         this.sortKey = null;
         this.sortDir = null;
         this.visibleCount = 30;

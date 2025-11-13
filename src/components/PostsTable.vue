@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch, nextTick } from "vue";
+import { onMounted, onUnmounted, ref, watch, nextTick, computed } from "vue";
 import { useDataStore } from "../stores/data";
 import { useAppStore } from "../stores/app";
 import UserDialog from "./UserDialog.vue";
@@ -10,12 +10,30 @@ const app = useAppStore();
 const scroller = ref<HTMLElement | null>(null);
 
 const sentinel = ref<HTMLElement | null>(null);
-// наблюдатель
+
+const activeKey = computed(() => data.sortKey);
+const dir = computed(() => data.sortDir);
+
 let io: IntersectionObserver | null = null;
 
 // состояние модалки
 const dialogOpen = ref(false);
 const dialogUserId = ref<number | null>(null);
+
+function indicatorFor(key: "id" | "title" | "author" | "body"): string {
+  return activeKey.value === key ? (dir.value === "asc" ? "▲" : "▼") : "↕";
+}
+function thClass(key: "id" | "title" | "author" | "body"): string {
+  return activeKey.value === key
+    ? "font-semibold"
+    : "text-neutral-700 dark:text-neutral-300";
+}
+function ariaSort(
+  key: "id" | "title" | "author" | "body"
+): "none" | "ascending" | "descending" {
+  if (activeKey.value !== key || !dir.value) return "none";
+  return dir.value === "asc" ? "ascending" : "descending";
+}
 
 // смена сортировки
 function sortBy(key: "id" | "title" | "author" | "body") {
@@ -77,36 +95,55 @@ watch(
     ref="scroller"
     class="h-full overflow-y-auto rounded border border-neutral-300 dark:border-neutral-700"
   >
-    <table class="w-full table-fixed border-collapse">
+    <table class="w-full table-fixed border-separate border-spacing-0">
       <thead>
-        <tr class="text-left text-sm font-medium">
+        <tr class="text-left text-sm">
           <th
             class="sticky-th px-3 py-2 cursor-pointer w-[64px]"
+            :class="thClass('id')"
+            :aria-sort="ariaSort('id')"
             @click="sortBy('id')"
             title="Сортировать по ID"
           >
-            ID
+            <span class="inline-flex items-center gap-1">
+              ID <span>{{ indicatorFor("id") }}</span>
+            </span>
           </th>
+
           <th
             class="sticky-th px-3 py-2 cursor-pointer"
+            :class="thClass('title')"
+            :aria-sort="ariaSort('title')"
             @click="sortBy('title')"
             title="Сортировать по заголовку"
           >
-            Заголовок
+            <span class="inline-flex items-center gap-1">
+              Заголовок <span>{{ indicatorFor("title") }}</span>
+            </span>
           </th>
+
           <th
             class="sticky-th px-3 py-2 cursor-pointer w-[220px]"
+            :class="thClass('author')"
+            :aria-sort="ariaSort('author')"
             @click="sortBy('author')"
             title="Сортировать по автору"
           >
-            Автор
+            <span class="inline-flex items-center gap-1">
+              Автор <span>{{ indicatorFor("author") }}</span>
+            </span>
           </th>
+
           <th
             class="sticky-th px-3 py-2 cursor-pointer"
+            :class="thClass('body')"
+            :aria-sort="ariaSort('body')"
             @click="sortBy('body')"
             title="Сортировать по контенту"
           >
-            Контент
+            <span class="inline-flex items-center gap-1">
+              Контент <span>{{ indicatorFor("body") }}</span>
+            </span>
           </th>
         </tr>
       </thead>
@@ -115,7 +152,7 @@ watch(
         <tr
           v-for="p in data.postsVisible"
           :key="p.id"
-          class="border-t border-neutral-200 dark:border-neutral-800"
+          class="border-t border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition"
         >
           <td class="px-3 py-2 truncate" :title="String(p.id)">{{ p.id }}</td>
           <td class="px-3 py-2 truncate" :title="p.title">{{ p.title }}</td>

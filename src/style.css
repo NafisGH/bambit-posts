@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom styles */
+.sticky-th {
+  @apply sticky top-0 z-10 bg-white dark:bg-neutral-900;
+}

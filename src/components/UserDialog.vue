@@ -33,10 +33,11 @@ function onOverlayClick(e: MouseEvent) {
   if (e.target === e.currentTarget) emit("close");
 }
 
-// если открыли существующего пользователя — помечаем как «просмотренного»
+// если открыли существующего пользователя — помечаем как «просмотренный»
 watch(
   () => props.open,
   (o) => {
+    document.body.style.overflow = o ? "hidden" : "";
     if (o && user.value) app.markUserViewed(user.value.id);
   }
 );
@@ -49,6 +50,18 @@ onUnmounted(() => {
   document.removeEventListener("keydown", onKey);
   document.removeEventListener("mousedown", onDocMouseDown);
 });
+
+const websiteUrl = computed(() => {
+  const w = user.value?.website?.trim();
+  if (!w) return null;
+  return /^https?:\/\//i.test(w) ? w : `http://${w}`;
+});
+
+const addressLine = computed(() => {
+  const a = user.value?.address;
+  if (!a) return "";
+  return [a.street, a.suite, a.city].filter(Boolean).join(", ");
+});
 </script>
 <template>
   <teleport to="body">
@@ -59,10 +72,13 @@ onUnmounted(() => {
     >
       <div
         ref="cardRef"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="user-dialog-title"
         class="w-full max-w-md rounded-xl border bg-white p-4 shadow-xl dark:bg-neutral-900 dark:border-neutral-700"
       >
         <header class="mb-3 flex items-center justify-between">
-          <h2 class="text-lg font-semibold">
+          <h2 id="user-dialog-title" class="text-lg font-semibold">
             {{ notFound ? "Пользователь не найден" : "Карточка пользователя" }}
           </h2>
           <button
@@ -80,15 +96,25 @@ onUnmounted(() => {
 
         <div v-else class="space-y-1 text-sm">
           <div><span class="opacity-70">Имя:</span> {{ user?.name }}</div>
+          <div><span class="opacity-70">Логин:</span> {{ user?.username }}</div>
           <div><span class="opacity-70">Почта:</span> {{ user?.email }}</div>
-          <div><span class="opacity-70">Ник:</span> {{ user?.username }}</div>
           <div><span class="opacity-70">Телефон:</span> {{ user?.phone }}</div>
-          <div><span class="opacity-70">Сайт:</span> {{ user?.website }}</div>
-          <div v-if="user?.company?.name">
-            <span class="opacity-70">Компания:</span> {{ user?.company?.name }}
+          <div v-if="websiteUrl" class="text-sm">
+            <span class="opacity-70">Веб-сайт: </span>
+            <a
+              :href="websiteUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="underline"
+            >
+              {{ user?.website }}
+            </a>
           </div>
-          <div v-if="user?.address?.city">
-            <span class="opacity-70">Город:</span> {{ user?.address?.city }}
+          <div v-if="user?.company?.name">
+            <span class="opacity-70">Компания: </span> {{ user?.company?.name }}
+          </div>
+          <div v-if="addressLine" class="text-sm">
+            <span class="opacity-70">Адрес: </span> {{ addressLine }}
           </div>
         </div>
 

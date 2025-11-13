@@ -5,6 +5,7 @@ import { useDataStore } from "./stores/data";
 import ThemeToggle from "./components/ThemeToggle.vue";
 import SearchBar from "./components/SearchBar.vue";
 import PostsTable from "./components/PostsTable.vue";
+import Toast from "./components/Toast.vue";
 
 const app = useAppStore();
 const data = useDataStore();
@@ -32,6 +33,7 @@ onMounted(() => {
         </div>
         <PostsTable v-else class="h-full" />
       </div>
+      <Toast />
     </section>
   </main>
 </template>
